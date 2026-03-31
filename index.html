@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cyber Leaderboard</title>
+
+<style>
+body {
+ margin:0;
+ font-family: 'Segoe UI', sans-serif;
+ background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+ color: white;
+ text-align:center;
+}
+
+h1 {
+ margin-top:20px;
+}
+
+.container {
+ width:80%;
+ margin:auto;
+}
+
+.top3 {
+ display:flex;
+ justify-content:center;
+ gap:20px;
+ margin-top:20px;
+}
+
+.card {
+ padding:20px;
+ border-radius:15px;
+ width:150px;
+ backdrop-filter: blur(10px);
+ background: rgba(255,255,255,0.1);
+ box-shadow: 0 0 20px rgba(0,255,255,0.3);
+}
+
+.gold { border:2px solid gold; }
+.silver { border:2px solid silver; }
+.bronze { border:2px solid #cd7f32; }
+
+.list {
+ margin-top:20px;
+}
+
+.item {
+ background: rgba(255,255,255,0.1);
+ margin:10px;
+ padding:10px;
+ border-radius:10px;
+ display:flex;
+ justify-content:space-between;
+}
+
+.admin {
+ margin-top:20px;
+ background: rgba(0,0,0,0.5);
+ padding:15px;
+ border-radius:10px;
+}
+
+input, button {
+ padding:8px;
+ margin:5px;
+ border:none;
+ border-radius:5px;
+}
+
+button {
+ background:#00ffff;
+ color:black;
+ cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>⚡ Cyber Leaderboard</h1>
+
+<div class="container">
+
+<div class="top3" id="top3"></div>
+
+<div class="list" id="list"></div>
+
+<div class="admin">
+<h3>Admin Panel</h3>
+<input id="name" placeholder="Name">
+<input id="score" type="number" placeholder="Score">
+<button onclick="addUser()">Add</button>
+<button onclick="generateLink()">Share</button>
+</div>
+
+</div>
+
+<script>
+let users=[];
+
+function addUser(){
+ let name=document.getElementById("name").value;
+ let score=parseInt(document.getElementById("score").value);
+
+ if(!name || isNaN(score)) return alert("Enter valid");
+
+ let existing=users.find(u=>u.name===name);
+ if(existing) existing.score=score;
+ else users.push({name,score});
+
+ updateUI();
+}
+
+function updateUI(){
+ users.sort((a,b)=>b.score-a.score);
+
+ let top3=document.getElementById("top3");
+ let list=document.getElementById("list");
+
+ top3.innerHTML="";
+ list.innerHTML="";
+
+ users.slice(0,3).forEach((u,i)=>{
+  let cls=["gold","silver","bronze"][i];
+  top3.innerHTML+=`
+   <div class="card ${cls}">
+   <h2>#${i+1}</h2>
+   <p>${u.name}</p>
+   <h3>${u.score}</h3>
+   </div>`;
+ });
+
+ users.slice(3).forEach((u,i)=>{
+  list.innerHTML+=`
+   <div class="item">
+   <span>#${i+4} ${u.name}</span>
+   <span>${u.score}</span>
+   </div>`;
+ });
+}
+
+function generateLink(){
+ let data=encodeURIComponent(JSON.stringify(users));
+ let url=window.location.origin+window.location.pathname+"?data="+data;
+ prompt("Copy link:",url);
+}
+
+window.onload=function(){
+ let params=new URLSearchParams(window.location.search);
+ let data=params.get("data");
+
+ if(data){
+  users=JSON.parse(decodeURIComponent(data));
+  document.querySelector(".admin").style.display="none";
+ }
+
+ updateUI();
+}
+</script>
+
+</body>
+</html>
